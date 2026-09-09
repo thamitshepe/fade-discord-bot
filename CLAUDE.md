@@ -133,4 +133,6 @@ Banner images live in `assets/images/`. Embeds reference them via `AttachmentBui
 
 ## Repo
 
-GitHub: `eros-co/fade-discord-bot`. Always commit and push after changes. Always update this file when the architecture changes.
+GitHub: `thamitshepe/fade-discord-bot` (private). Always commit and push after changes. Always update this file when the architecture changes.
+
+Never commit real credentials. `.gitignore` excludes `*.env` (with `.env.example` as the only tracked template) and `data/`.
