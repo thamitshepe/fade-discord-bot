@@ -1,0 +1,11 @@
+{
+  "name": "discord-bot",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "bun src/index.js",
+    "deploy": "bun src/deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.2"
+  }
+}

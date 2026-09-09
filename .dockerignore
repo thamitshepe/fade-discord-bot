@@ -1,0 +1,13 @@
+.git
+.github
+.claude
+node_modules
+data
+docs
+*.md
+.env
+.env.*
+*.env
+.DS_Store
+Dockerfile
+.dockerignore
