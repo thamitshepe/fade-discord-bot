@@ -8,65 +8,71 @@ module.exports = {
   },
 
   services: [
-    { label: 'Core Optimization — €90', value: 'core_optimization', price: 90, recurring: false },
-    { label: 'Signature Optimization — €130', value: 'signature_optimization', price: 130, recurring: false },
-    { label: 'Care Plan — €25/month', value: 'care_plan', price: 25, recurring: true },
+    {
+      label: 'Complete PC Optimization — €60',
+      value: 'complete_pc_optimization',
+      price: 60,
+      recurring: false,
+    },
   ],
 
   serviceDetails: {
-    core_optimization: {
-      name: 'Core Optimization',
-      price: '€90',
-      duration: '~45-60 mins',
-      description: 'Full system optimization covering BIOS, Windows, drivers, and more.',
+    complete_pc_optimization: {
+      name: 'Complete PC Optimization',
+      price: '€60',
+      duration: 'Approximately 10 minutes for Windows setup; full session varies by system',
+
+      description:
+        'An all-in-one optimization service covering BIOS, Windows, GPU drivers, networking, and system-level performance configuration.',
+
       includes: [
-        'BIOS Optimization (including Hidden BIOS)',
-        'Full Windows Optimization',
-        'Deep System Debloating',
-        'GPU Driver & Settings Optimization (NVIDIA / AMD)',
-        'Network Optimization',
-        'Input & Latency Optimization',
-        'Custom Power Plan',
-        'Registry Optimization',
-        'Process Reduction',
-        'Game & Application Optimization',
-        'System Stability Testing & Verification',
+        'Full BIOS configuration and advanced hidden BIOS settings',
+        'CPU and RAM behaviour optimization',
+        'Windows 11 installation assistance',
+        'Complete Windows configuration and debloating',
+        'NVIDIA / AMD GPU driver optimization',
+        'Debloated GPU driver installation',
+        'Custom NVPI profile for NVIDIA GPUs',
+        'GPU performance and power configuration',
+        'Network optimization, including NetAdapterCx and NDIS settings',
+        'Network power-saving configuration',
+        'Windows thread and processor scheduling optimization',
+        'Core-to-core latency optimization for multi-CCD Ryzen CPUs and Intel E-cores',
+        'System responsiveness and latency configuration',
+        'Final configuration review and stability checks',
       ],
-      audience: 'If you experience stuttering, input lag, or FPS drops, this session is built for you.',
-    },
-    signature_optimization: {
-      name: 'Signature Optimization',
-      price: '€130',
-      duration: '~90 mins',
-      description: 'Everything in Core Optimization plus advanced memory tuning and extended validation.',
-      includes: [
-        'Everything included in Core Optimization',
-        'Advanced Memory Tuning (frequency, timings, and fabric optimization)',
-        'Extended Stability Testing & Validation',
+
+      benefits: [
+        'Improve FPS consistency and responsiveness',
+        'Reduce frame-time variance and micro-stuttering',
+        'Reduce input and system latency',
+        'Reduce unnecessary power-saving delays',
+        'Improve CPU scheduling and thread behaviour',
+        'Maintain compatibility with supported anti-cheat systems',
       ],
-      audience: 'For competitive players who want every possible edge extracted from their hardware.',
-    },
-    care_plan: {
-      name: 'Care Plan',
-      price: '€25/month',
-      duration: 'Ongoing',
-      description: 'Monthly system maintenance to keep your optimizations running at peak performance.',
-      includes: [
-        'Monthly system check-up & optimization verification',
-        'Performance, stability & temperature monitoring',
-        'System cleanup (temp files, startup items, background processes)',
-        'Configuration review (checking for issues or performance loss if you messed up anything)',
-        'Priority troubleshooting & support',
-      ],
-      audience: 'For clients who want ongoing peace of mind after their session.',
+
+      audience:
+        'For players experiencing inconsistent FPS, stuttering, frame drops, input delay, or general system performance issues.',
     },
   },
 
   paymentMethods: [
-    { label: 'PayPal (Friends & Family)', value: 'paypal' },
-    { label: 'Crypto', value: 'crypto' },
-    { label: 'PaySafeCard (+€15 fee)', value: 'paysafecard' },
-    { label: 'Gift Card (+€15 fee)', value: 'giftcard' },
+    {
+      label: 'PayPal (Friends & Family)',
+      value: 'paypal',
+    },
+    {
+      label: 'Crypto',
+      value: 'crypto',
+    },
+    {
+      label: 'PaySafeCard (+€15 fee)',
+      value: 'paysafecard',
+    },
+    {
+      label: 'Gift Card (+€15 fee)',
+      value: 'giftcard',
+    },
   ],
 
   goals: [
@@ -77,14 +83,18 @@ module.exports = {
 
   customIds: {
     ticketPanelSelect: 'ticket_panel_select',
+
     continueBooking: 'continue_booking',
+
     serviceSelect: 'service_select',
     paymentSelect: 'payment_select',
     goalSelect: 'goal_select',
+
     bookingForm: 'booking_form',
     pcSpecsInput: 'pc_specs_input',
     gamesInput: 'games_input',
     appsInput: 'apps_input',
+
     // Ticket management
     reviewTicket: 'review_ticket',
     closeTicket: 'close_ticket',
@@ -92,16 +102,32 @@ module.exports = {
     closeReasonInput: 'close_reason_input',
     confirmClose: 'confirm_close',
     cancelClose: 'cancel_close',
-    // New booking flow
+
+    // Booking flow
     selectService: 'select_service',
     confirmService: 'confirm_service',
     askQuestion: 'ask_question',
     selectPayment: 'select_payment',
-    selectGoal: 'select_goal',
+
+    // Questionnaire modals
     bookingModal: 'booking_modal',
-    // New modal fields
-    bookingPcSpecsInput: 'booking_pc_specs_input',
+    bookingDetailsModal: 'booking_details_modal',
+
+    // First questionnaire
+    bookingNameInput: 'booking_name_input',
+    bookingCpuInput: 'booking_cpu_input',
+    bookingGpuInput: 'booking_gpu_input',
+    bookingMotherboardInput: 'booking_motherboard_input',
+    bookingRamInput: 'booking_ram_input',
+
+    // Second questionnaire
+    bookingObjectiveInput: 'booking_objective_input',
     bookingGamesInput: 'booking_games_input',
+    bookingWindowsInput: 'booking_windows_input',
+    bookingAvailabilityInput: 'booking_availability_input',
     bookingAppsInput: 'booking_apps_input',
+
+    // Legacy fields
+    bookingPcSpecsInput: 'booking_pc_specs_input',
   },
 };

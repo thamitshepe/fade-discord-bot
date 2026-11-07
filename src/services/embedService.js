@@ -1,167 +1,177 @@
 const {
-  EmbedBuilder,
   ActionRowBuilder,
-  StringSelectMenuBuilder,
-  StringSelectMenuOptionBuilder,
   ButtonBuilder,
   ButtonStyle,
+  EmbedBuilder,
   AttachmentBuilder,
-  ContainerBuilder,
-  MediaGalleryBuilder,
-  TextDisplayBuilder,
-  SeparatorBuilder,
+  StringSelectMenuBuilder,
 } = require('discord.js');
-const { colors, customIds } = require('../../config/constants');
+
 const path = require('path');
 
-const BANNER_PATH = path.join(__dirname, '..', '..', 'assets', 'images', 'tickets.png');
+const {
+  colors,
+  services,
+  serviceDetails,
+  paymentMethods,
+  goals,
+  customIds,
+} = require('../../config/constants');
+
+const TICKET_BANNER_PATH = path.join(
+  __dirname,
+  '..',
+  '..',
+  'assets',
+  'images',
+  'ticket.png'
+);
+
+function safeValue(value, fallback = 'Not provided') {
+  if (value === null || value === undefined || String(value).trim() === '') {
+    return fallback;
+  }
+
+  return String(value).trim().slice(0, 1024);
+}
 
 function ticketPanelComponents() {
-  // Banner at top
-  const banner = new MediaGalleryBuilder().addItems({
-    media: { url: 'attachment://tickets.png' },
-  });
-
-  // Title + Description (single TextDisplay)
-  const titleBlock = new TextDisplayBuilder().setContent(
-    '# FadeSolutions Support\nOpen one support ticket and keep everything in the same thread so we can help faster.'
-  );
-
-  // Timezone
- /*  const timezone = new TextDisplayBuilder().setContent(
-    ''
-  );
-
-  */ 
-
-  // Information
-  const info = new TextDisplayBuilder().setContent(
-    '**Priority Support (Clients & Serious Buyers)**\n' +
-    '- Support is for active clients and users ready to book. **DMs are ignored**.\n' +
-    '- Keep one issue per ticket. Duplicate/off-topic tickets may be closed.\n\n' +
-    '**Best Use Cases**\n' +
-    '- Session scheduling or rescheduling\n' +
-    '- Payment confirmation and booking follow-up\n' +
-    '- Post-optimization issues (FPS, stutters, crashes)\n' +
-    '- App/game setup tied to your optimization\n\n' +
-    '**To Get Fast Help, Include**\n' +
-    '- Your goal (FPS, input delay, stability)\n' +
-    '- PC specs + motherboard\n' +
-    '- Affected games/apps + screenshots/errors\n\n'
-  );
-
-  // Select menu
-  const selectRow = new ActionRowBuilder().addComponents(
-    new StringSelectMenuBuilder()
-      .setCustomId(customIds.ticketPanelSelect)
-      .setPlaceholder('☰ Open a support ticket...')
-      .addOptions(
-        new StringSelectMenuOptionBuilder()
-          .setLabel('Support')
-          .setDescription('Get support from the team')
-          .setValue('support'),
-      )
-  );
-
-  const container = new ContainerBuilder()
-    .addMediaGalleryComponents(banner)
-    .addTextDisplayComponents(titleBlock)
-    //.addTextDisplayComponents(timezone)
-    .addSeparatorComponents(new SeparatorBuilder())
-    .addTextDisplayComponents(info)
-    .addSeparatorComponents(new SeparatorBuilder())
-    .addActionRowComponents(selectRow);
-
-  return [container];
+  return [
+    {
+      type: 1,
+      components: [
+        {
+          type: 2,
+          style: 1,
+          label: 'Open a Ticket',
+          custom_id: customIds.ticketPanelSelect,
+        },
+      ],
+    },
+  ];
 }
 
 function ticketPanelAttachment() {
-  return new AttachmentBuilder(BANNER_PATH, { name: 'tickets.png' });
+  return new AttachmentBuilder(TICKET_BANNER_PATH, {
+    name: 'ticket.png',
+  });
 }
 
 function bookingSummaryEmbed(data) {
   return new EmbedBuilder()
-    .setTitle('Booking Request')
-    .setDescription('Your ticket is under review. A staff member will review your booking shortly.')
     .setColor(colors.embed)
+    .setTitle('Booking Summary')
     .addFields(
-      { name: 'Service', value: data.service, inline: true },
-      { name: 'Payment Method', value: data.payment, inline: true },
-      { name: 'Goal', value: data.goal, inline: true },
-      { name: 'PC Specs', value: data.pcSpecs || 'Not provided' },
-      { name: 'Games', value: data.games || 'Not provided' },
-      { name: 'Apps / Software', value: data.apps || 'Not provided' },
-    );
+      {
+        name: 'Customer',
+        value: safeValue(data.customer),
+        inline: true,
+      },
+      {
+        name: 'Service',
+        value: safeValue(data.service),
+        inline: true,
+      },
+      {
+        name: 'Price',
+        value: safeValue(data.price),
+        inline: true,
+      },
+      {
+        name: 'Payment Method',
+        value: safeValue(data.paymentMethod || data.payment),
+        inline: true,
+      }
+    )
+    .setTimestamp();
 }
 
 function ticketActionRow() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(customIds.reviewTicket)
-      .setLabel('Reviewing')
+      .setLabel('Review Ticket')
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId(customIds.closeTicket)
       .setLabel('Close Ticket')
-      .setStyle(ButtonStyle.Danger),
+      .setStyle(ButtonStyle.Danger)
   );
 }
 
-function approvedEmbed() {
+function approvedEmbed(data) {
   return new EmbedBuilder()
+    .setColor(colors.success)
     .setTitle('Ticket Approved')
-    .setDescription('Your booking has been approved. Please complete payment using the instructions below.')
-    .setColor(colors.success);
+    .setDescription(
+      `Your request has been reviewed${data?.staff ? ` by ${data.staff}` : ''}.`
+    )
+    .setTimestamp();
 }
 
-function closeConfirmEmbed(reason) {
-  const embed = new EmbedBuilder()
-    .setTitle('Close Ticket')
-    .setDescription('Are you sure you want to close this ticket?')
-    .setColor(colors.danger);
-
-  if (reason && reason !== 'No reason provided') {
-    embed.addFields({ name: 'Reason', value: reason });
-  }
-
-  return embed;
+function closeConfirmEmbed() {
+  return new EmbedBuilder()
+    .setColor(colors.warning)
+    .setTitle('Close Ticket?')
+    .setDescription(
+      'Are you sure you want to close this ticket? This action will archive the conversation.'
+    );
 }
 
 function closeConfirmButtons() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(customIds.confirmClose)
-      .setLabel('Confirm Close')
+      .setLabel('Confirm')
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(customIds.cancelClose)
       .setLabel('Cancel')
-      .setStyle(ButtonStyle.Secondary),
+      .setStyle(ButtonStyle.Secondary)
   );
 }
 
-function ticketLogEmbed(logData) {
+function ticketLogEmbed(data) {
   return new EmbedBuilder()
+    .setColor(colors.embed)
     .setTitle('Ticket Closed')
-    .setColor(0xFFFFFF)
     .addFields(
-      { name: '<:ID:1495252449823428750> Ticket ID', value: logData.threadId },
-      { name: '<:Openedby:1495252525371232266> Opened By', value: `<@${logData.openedBy}>`, inline: true },
-      { name: '<:Closedby:1495252556325326948> Closed By', value: `<@${logData.closedBy}>`, inline: true },
-      { name: ' ', value: ' ' },
-      { name: '<:Openedat:1495252418278064189> Opened At', value: logData.openedAt ? `<t:${logData.openedAt}:D>` : 'Unknown', inline: true },
-      { name: '<:Closedat:1495250473832153169> Closed At', value: `<t:${logData.closedAt}:D>`, inline: true },
-    );
+      {
+        name: 'Ticket',
+        value: safeValue(data.threadName),
+        inline: true,
+      },
+      {
+        name: 'Opened By',
+        value: safeValue(data.openedBy),
+        inline: true,
+      },
+      {
+        name: 'Closed By',
+        value: safeValue(data.closedByTag),
+        inline: true,
+      },
+      {
+        name: 'Reason',
+        value: safeValue(data.reason),
+      }
+    )
+    .setTimestamp();
 }
 
-function ticketLogActionRow(logData) {
-  const { guildId } = require('../../config/settings');
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setLabel('View Thread')
-      .setStyle(ButtonStyle.Link)
-      .setURL(`https://discord.com/channels/${guildId}/${logData.threadId}`)
-  );
+function ticketLogActionRow(data) {
+  const row = new ActionRowBuilder();
+
+  if (data?.threadId) {
+    row.addComponents(
+      new ButtonBuilder()
+        .setLabel('View Ticket')
+        .setStyle(ButtonStyle.Link)
+        .setURL(`https://discord.com/channels/${data.guildId}/${data.threadId}`)
+    );
+  }
+
+  return row;
 }
 
 function supportCloseRow() {
@@ -169,101 +179,187 @@ function supportCloseRow() {
     new ButtonBuilder()
       .setCustomId(customIds.closeTicket)
       .setLabel('Close Ticket')
-      .setStyle(ButtonStyle.Danger),
+      .setStyle(ButtonStyle.Danger)
   );
 }
 
 function serviceDetailEmbed(serviceKey) {
-  const { serviceDetails } = require('../../config/constants');
-  const detail = serviceDetails[serviceKey];
-  if (!detail) return null;
+  const service = serviceDetails[serviceKey];
 
-  const includesList = detail.includes.map(item => `- ${item}`).join('\n');
+  if (!service) return null;
 
-  return new EmbedBuilder()
-    .setTitle(detail.name)
-    .setDescription(`**${detail.price}** · ${detail.duration}`)
+  const embed = new EmbedBuilder()
     .setColor(colors.primary)
-    .addFields(
-      { name: 'What\'s Included', value: includesList },
-    );
+    .setTitle(service.name)
+    .setDescription(service.description)
+    .addFields({
+      name: 'Price',
+      value: safeValue(service.price),
+      inline: true,
+    });
+
+  if (service.duration) {
+    embed.addFields({
+      name: 'Estimated Duration',
+      value: safeValue(service.duration),
+      inline: true,
+    });
+  }
+
+  if (service.audience) {
+    embed.addFields({
+      name: 'Who is this for?',
+      value: safeValue(service.audience),
+    });
+  }
+
+  if (service.includes?.length) {
+    embed.addFields({
+      name: 'Included',
+      value: service.includes.map((item) => `• ${item}`).join('\n').slice(0, 1024),
+    });
+  }
+
+  if (service.benefits?.length) {
+    embed.addFields({
+      name: 'Potential Benefits',
+      value: service.benefits.map((item) => `• ${item}`).join('\n').slice(0, 1024),
+    });
+  }
+
+  return embed;
 }
 
 function serviceDetailButtons(serviceKey) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`${customIds.confirmService}_${serviceKey}`)
-      .setLabel('Ready to Buy')
-      .setStyle(ButtonStyle.Success),
-    new ButtonBuilder()
-      .setCustomId(customIds.askQuestion)
-      .setLabel('More Questions')
-      .setStyle(ButtonStyle.Secondary),
+      .setLabel('Continue')
+      .setStyle(ButtonStyle.Primary)
   );
 }
 
 function paymentSelectRow() {
-  const { paymentMethods } = require('../../config/constants');
+  const options = paymentMethods.map((method) => ({
+    label: method.label,
+    value: method.value,
+  }));
+
   return new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId(customIds.selectPayment)
-      .setPlaceholder('Select a payment method')
-      .addOptions(
-        paymentMethods.map(p =>
-          new StringSelectMenuOptionBuilder().setLabel(p.label).setValue(p.value)
-        )
-      )
+      .setPlaceholder('Choose a payment method')
+      .addOptions(options)
   );
 }
 
 function goalSelectRow() {
-  const { goals } = require('../../config/constants');
   return new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
-      .setCustomId(customIds.selectGoal)
-      .setPlaceholder('What\'s your main goal?')
+      .setCustomId(customIds.goalSelect)
+      .setPlaceholder('Choose your main goal')
       .addOptions(
-        goals.map(g =>
-          new StringSelectMenuOptionBuilder().setLabel(g.label).setValue(g.value)
-        )
+        goals.map((goal) => ({
+          label: goal.label,
+          value: goal.value,
+        }))
       )
   );
 }
 
 function newBookingSummaryEmbed(data) {
   const embed = new EmbedBuilder()
-    .setTitle('Booking Request')
-    .setDescription('A staff member will review your booking shortly.')
-    .setColor(0xFFFFFF)
+    .setColor(colors.primary)
+    .setTitle('Complete PC Optimization Booking')
+    .setDescription(
+      'A new optimization request has been submitted. Review the customer information and requirements below.'
+    )
     .addFields(
-      { name: 'Service', value: data.service },
-      { name: 'Payment Method', value: data.payment },
-      { name: 'Goal', value: data.goal },
-      { name: 'PC Specs', value: data.pcSpecs || 'Not provided' },
-      { name: 'Games', value: data.games || 'Not provided' },
-      { name: 'Apps / Software', value: data.apps || 'Not provided' },
+      {
+        name: 'Customer',
+        value: safeValue(data.customer),
+        inline: true,
+      },
+      {
+        name: 'Service',
+        value: safeValue(data.service),
+        inline: true,
+      },
+      {
+        name: 'Price',
+        value: safeValue(data.price),
+        inline: true,
+      },
+      {
+        name: 'Payment Method',
+        value: safeValue(data.paymentMethod || data.payment),
+        inline: true,
+      },
+      {
+        name: 'CPU',
+        value: safeValue(data.cpu),
+        inline: true,
+      },
+      {
+        name: 'GPU',
+        value: safeValue(data.gpu),
+        inline: true,
+      },
+      {
+        name: 'Motherboard',
+        value: safeValue(data.motherboard),
+        inline: true,
+      },
+      {
+        name: 'RAM',
+        value: safeValue(data.ram),
+        inline: true,
+      },
+      {
+        name: 'What They Want to Improve',
+        value: safeValue(data.objective),
+      },
+      {
+        name: 'Games Played',
+        value: safeValue(data.games),
+      },
+      {
+        name: 'Windows Version',
+        value: safeValue(data.windows),
+        inline: true,
+      },
+      {
+        name: 'Availability & Timezone',
+        value: safeValue(data.availability),
+      },
+      {
+        name: 'Apps Used While Gaming',
+        value: safeValue(data.apps),
+      }
     );
 
-  if (data.fee > 0) {
-    embed.addFields({ name: 'Processing Fee', value: `+€${data.fee}` });
+  if (Number(data.fee) > 0) {
+    embed.addFields({
+      name: 'Additional Processing Fee',
+      value: `€${Number(data.fee).toFixed(2)}`,
+      inline: true,
+    });
   }
 
-  return embed;
+  return embed.setTimestamp();
 }
 
-function paymentInstructionsEmbed(paymentKey) {
-  const { getPaymentInfo } = require('./paymentService');
-  const { instructions, fee } = getPaymentInfo(paymentKey);
-
-  let description = instructions;
-  if (fee > 0) {
-    description += `\n\n> A **€${fee} processing fee** applies to this payment method.`;
-  }
-
+function paymentInstructionsEmbed(data) {
   return new EmbedBuilder()
+    .setColor(colors.primary)
     .setTitle('Payment Instructions')
-    .setDescription(description)
-    .setColor(colors.warning);
+    .setDescription(safeValue(data.instructions))
+    .addFields({
+      name: 'Payment Method',
+      value: safeValue(data.method),
+      inline: true,
+    })
+    .setTimestamp();
 }
 
 module.exports = {
